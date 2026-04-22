@@ -1,7 +1,5 @@
 # 保险营销内容智能审核系统
 
-> 实操考题：基于大模型的保险营销内容智能审核
-
 ## 快速开始
 
 ```bash
@@ -58,7 +56,19 @@ flowchart TD
 
 ## 关键设计说明
 
-见 [docs/design.md](docs/design.md)
+见 [design.md](docs/design.md)
+
+---
+
+## 输出展示报告
+
+见[demo_output.md](docs/demo_output.md)
+
+---
+
+## 效果评估报告
+
+见[evaluate_output.md](docs/evaluate_output.md)
 
 ---
 
@@ -68,9 +78,9 @@ flowchart TD
 reviewer/
 ├── src/
 │   ├── pipeline.py          # 主编排器
-│   ├── retrieval/           # 混合检索（BM25 + 向量 + Rerank）
-│   ├── llm_review/          # Prompt 构建 + LLM 调用 + 输出解析
-│   ├── multimodal/          # 图像 OCR（qwen-vl-max）
+│   ├── retrieval/           # 混合检索（BM25 + 向量【dashscope text-embedding】 + Rerank【dashscope text-rerank】）
+│   ├── llm_review/          # Prompt 构建 + LLM 调用【qwen-plus】 + 输出解析
+│   ├── multimodal/          # 图像 OCR【qwen-vl-max】
 │   ├── indexing/            # 索引构建工具
 │   ├── evaluation/          # 评估指标（Precision / Recall / F1）
 │   └── config/              # 配置、违规类型定义
@@ -91,16 +101,16 @@ reviewer/
 
 ## 支持的违规类型
 
-| ID  | 类型               |
-|-----|--------------------|
-| V01 | 承诺本金不受损失   |
-| V02 | 夸大或承诺收益     |
-| V03 | 绝对化/极限化用语  |
-| V04 | 缺失风险提示       |
-| V05 | 无资质代言         |
-| V06 | 虚假/误导性信息    |
-| V07 | 违规比较竞品       |
-| V08 | 隐瞒关键信息       |
-| V09 | 诱导性语言         |
-| V10 | 违规承诺服务       |
-| V11 | 其他合规违规       |
+| ID  | 类型              |
+| --- | ----------------- |
+| V01 | 承诺本金不受损失  |
+| V02 | 夸大或承诺收益    |
+| V03 | 绝对化/极限化用语 |
+| V04 | 缺失风险提示      |
+| V05 | 无资质代言        |
+| V06 | 虚假/误导性信息   |
+| V07 | 违规比较竞品      |
+| V08 | 隐瞒关键信息      |
+| V09 | 诱导性语言        |
+| V10 | 违规承诺服务      |
+| V11 | 其他合规违规      |

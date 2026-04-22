@@ -6,16 +6,16 @@ Usage:
 """
 
 from __future__ import annotations
-
-import json
-import logging
-import sys
 from pathlib import Path
 
-# Ensure src/ is on PYTHONPATH when running from repo root
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+if True:
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import logging
+import json
 from src.pipeline import CompliancePipeline
+
 
 # ---------------------------------------------------------------------------
 # Logging setup
@@ -49,8 +49,8 @@ BUILTIN_CASES = [
         "text": "本产品由XX保险公司承保，犹豫期15天，退保可能会有损失",
     },
     {
-        "name": "边界模糊",
-        "text": "购买本产品有惊喜",
+        "name": "边界模糊（历史业绩暗示）",
+        "text": "本产品过去5年平均年化收益7%，业绩持续跑赢市场",
     },
 ]
 
@@ -76,9 +76,9 @@ def run_case(pipeline: CompliancePipeline, name: str, text: str) -> None:
 
     print(f"违规项   : {len(result['violations'])} 条")
     for v in result["violations"]:
-        print(f"  - [{v.get('violation_type_id', '?')}] {v.get('violation_type_name', '?')}")
+        print(
+            f"  - [{v.get('violation_type_id', '?')}] {v.get('violation_type_name', '?')}")
         print(f"    原因: {v.get('reason', '')}")
-        print(f"    建议: {v.get('directional_advice', '')}")
 
     print(f"检索条文 : {len(result['top_chunks'])} 条")
     for idx, chunk in enumerate(result["top_chunks"], start=1):
@@ -86,13 +86,13 @@ def run_case(pipeline: CompliancePipeline, name: str, text: str) -> None:
         preview = chunk["text"][:120].replace("\n", " ")
         print(f"      {preview}...")
 
-    if result["reference_chunks"]:
-        print(f"参考条文 : {len(result['reference_chunks'])} 条")
-        for idx, chunk in enumerate(result["reference_chunks"], start=1):
-            print(f"  [R{idx}] {chunk['chunk_id']} (score={chunk['score']:.4f})")
+    # if result["reference_chunks"]:
+    #     print(f"参考条文 : {len(result['reference_chunks'])} 条")
+    #     for idx, chunk in enumerate(result["reference_chunks"], start=1):
+    #         print(f"  [R{idx}] {chunk['chunk_id']} (score={chunk['score']:.4f})")
 
-    print("\n【完整 JSON 输出】")
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    # print("\n【完整 JSON 输出】")
+    # print(json.dumps(result, ensure_ascii=False, indent=2))
     print()
 
 
