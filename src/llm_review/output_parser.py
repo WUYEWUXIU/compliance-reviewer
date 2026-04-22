@@ -184,6 +184,5 @@ def _build_fallback(raw_output: str, reason: str) -> Dict[str, Any]:
         "positive_compliance": [],
         "error": "llm_output_unparseable",
         "raw_output": raw_output,
-        "confidence": 0,
         "reason": reason,
     }

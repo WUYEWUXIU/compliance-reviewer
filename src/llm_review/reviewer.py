@@ -38,7 +38,6 @@ class ReviewResult:
     compliant: str  # "yes", "no", or "unknown"
     violations: List[Dict[str, Any]]
     positive_compliance: List[Dict[str, Any]]
-    confidence: float
     raw_output: str
     validation_errors: List[str]
     used_mock: bool
@@ -65,24 +64,11 @@ class LLMReviewer:
         marketing_text: str,
         top_chunks: List[RerankResult],
         reference_chunks: List[RerankResult],
-        confidence_score: float,
     ) -> ReviewResult:
-        """Run compliance review on marketing text.
-
-        Args:
-            marketing_text: The marketing copy to review.
-            top_chunks: Top-5 reranked chunks.
-            reference_chunks: Citation-graph expansion chunks.
-            confidence_score: Retrieval confidence score (0-1).
-
-        Returns:
-            ReviewResult with structured conclusion.
-        """
+        """Run compliance review on marketing text."""
         if not self.api_key:
             logger.warning("BAILIAN_API_KEY not configured; using mock review.")
-            return self._mock_review(
-                marketing_text, top_chunks, reference_chunks, confidence_score
-            )
+            return self._mock_review(marketing_text, top_chunks, reference_chunks)
 
         system_prompt = build_system_prompt()
         user_prompt = build_user_prompt(marketing_text, top_chunks, reference_chunks)
@@ -98,7 +84,6 @@ class LLMReviewer:
             compliant=parsed.get("compliant", "unknown"),
             violations=parsed.get("violations", []),
             positive_compliance=parsed.get("positive_compliance", []),
-            confidence=confidence_score,
             raw_output=raw_output,
             validation_errors=validation_errors,
             used_mock=False,
@@ -188,7 +173,6 @@ class LLMReviewer:
         marketing_text: str,
         top_chunks: List[RerankResult],
         reference_chunks: List[RerankResult],
-        confidence_score: float,
     ) -> ReviewResult:
         """Generate a rule-based mock review result.
 
@@ -297,7 +281,6 @@ class LLMReviewer:
             compliant=compliant,
             violations=violations,
             positive_compliance=positive_compliance,
-            confidence=confidence_score,
             raw_output=raw_output,
             validation_errors=[],
             used_mock=True,

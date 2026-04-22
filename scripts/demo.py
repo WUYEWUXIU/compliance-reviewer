@@ -70,8 +70,6 @@ def run_case(pipeline: CompliancePipeline, name: str, text: str) -> None:
     result = pipeline.review(text)
 
     print(f"合规结论 : {result['compliant']}")
-    print(f"置信度   : {result['confidence']}")
-    print(f"行动建议 : {result['action_advice']}")
 
     if result.get("warning"):
         print(f"警告     : {result['warning']}")

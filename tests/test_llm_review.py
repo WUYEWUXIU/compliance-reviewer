@@ -35,7 +35,7 @@ def test_mock_violation_detection() -> None:
             "金融产品营销宣传不得含有保本保息、稳赚等表述。",
         ),
     ]
-    result = reviewer.review(text, chunks, [], confidence_score=0.85)
+    result = reviewer.review(text, chunks, [])
 
     assert result.used_mock is True
     assert result.compliant == "no"
@@ -69,7 +69,7 @@ def test_mock_negation_aware() -> None:
             "保险销售人员不得承诺本金不受损失。",
         ),
     ]
-    result = reviewer.review(text, chunks, [], confidence_score=0.7)
+    result = reviewer.review(text, chunks, [])
 
     assert result.used_mock is True
     # "不保本" should not trigger V01; "不确定" should not trigger V02
@@ -87,7 +87,7 @@ def test_mock_positive_compliance() -> None:
     # Use exact keywords from COMPLIANCE_TAGS to ensure mock matching works
     text = "本产品由XX保险公司承保，犹豫期为15天，退保损失由投保人承担。"
     chunks = []
-    result = reviewer.review(text, chunks, [], confidence_score=0.6)
+    result = reviewer.review(text, chunks, [])
 
     # C01 keywords ("本产品由", "保险公司承保", "犹豫期", "退保损失") overlap
     # with V05/V08 keywords; mock should resolve overlap in favor of compliance.
