@@ -59,34 +59,6 @@ def test_mock_violation_detection() -> None:
     print("[PASS] test_mock_violation_detection")
 
 
-def test_mock_positive_compliance() -> None:
-    """Test that mock reviewer detects positive compliance signals and
-    does not flag them as violations."""
-    reviewer = LLMReviewer(api_key="")
-    # Use exact keywords from COMPLIANCE_TAGS to ensure mock matching works
-    text = "本产品由XX保险公司承保，犹豫期为15天，退保损失由投保人承担。"
-    chunks = []
-    result = reviewer.review(text, chunks, [])
-
-    # C01 keywords ("本产品由", "保险公司承保", "犹豫期", "退保损失") overlap
-    # with V05/V08 keywords; mock should resolve overlap in favor of compliance.
-    assert result.compliant == "yes", (
-        f"Expected compliant=yes for risk-disclosure text, got {result.compliant}. "
-        f"Violations: {result.violations}"
-    )
-    assert len(result.positive_compliance) >= 1
-
-    tag_ids = {p["tag_id"] for p in result.positive_compliance}
-    assert "C01" in tag_ids, f"Expected C01 in positive_compliance, got {tag_ids}"
-
-    for p in result.positive_compliance:
-        assert "tag_id" in p
-        assert "tag_name" in p
-        assert "evidence" in p
-
-    print("[PASS] test_mock_positive_compliance")
-
-
 def test_output_parser_valid_json() -> None:
     """Test parsing a well-formed LLM JSON output."""
     raw = json.dumps(
@@ -104,7 +76,6 @@ def test_output_parser_valid_json() -> None:
                     "directional_advice": "建议删除收益承诺",
                 }
             ],
-            "positive_compliance": [],
         },
         ensure_ascii=False,
     )
@@ -125,20 +96,13 @@ def test_output_parser_markdown_fence() -> None:
         {
             "compliant": "yes",
             "violations": [],
-            "positive_compliance": [
-                {
-                    "tag_id": "C01",
-                    "tag_name": "含法定风险提示",
-                    "evidence": "文案含风险提示",
-                }
-            ],
         },
         ensure_ascii=False,
     )
     raw = f"```json\n{inner}\n```"
     parsed = parse_llm_output(raw)
     assert parsed["compliant"] == "yes"
-    assert len(parsed["positive_compliance"]) == 1
+    assert parsed["violations"] == []
 
     errors = validate_output(parsed)
     assert errors == [], f"Unexpected validation errors: {errors}"
@@ -153,7 +117,6 @@ def test_output_parser_fallback() -> None:
 
     assert parsed["compliant"] == "unknown"
     assert parsed["violations"] == []
-    assert parsed["positive_compliance"] == []
     assert parsed["error"] == "llm_output_unparseable"
     assert "raw_output" in parsed
 
@@ -171,14 +134,13 @@ def test_output_parser_empty() -> None:
 
 def test_validate_output_missing_fields() -> None:
     """Test validation catches missing required fields."""
-    bad = {"compliant": "no", "violations": []}  # missing positive_compliance
+    bad = {"compliant": "no"}  # missing violations
     errors = validate_output(bad)
-    assert any("positive_compliance" in e for e in errors)
+    assert any("violations" in e for e in errors)
 
     bad2 = {
         "compliant": "maybe",
         "violations": [],
-        "positive_compliance": [],
     }
     errors2 = validate_output(bad2)
     assert any("compliant" in e for e in errors2)
@@ -188,7 +150,6 @@ def test_validate_output_missing_fields() -> None:
         "violations": [
             {"violation_type_id": "V01"}  # missing many fields
         ],
-        "positive_compliance": [],
     }
     errors3 = validate_output(bad3)
     assert len(errors3) > 0
@@ -203,10 +164,7 @@ def test_system_prompt_contains_catalogue() -> None:
     prompt = build_system_prompt()
     assert "V01" in prompt
     assert "V11" in prompt
-    assert "C01" in prompt
-    assert "C03" in prompt
     assert "JSON" in prompt
-    assert "positive_compliance" in prompt
 
     print("[PASS] test_system_prompt_contains_catalogue")
 
@@ -240,7 +198,6 @@ if __name__ == "__main__":
     print("=" * 60)
 
     test_mock_violation_detection()
-    test_mock_positive_compliance()
     test_output_parser_valid_json()
     test_output_parser_markdown_fence()
     test_output_parser_fallback()

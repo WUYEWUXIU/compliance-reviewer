@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-自动为合规审核 RAG 系统的 chunk 标注 violation_tags 和 compliance_tags。
+自动为合规审核 RAG 系统的 chunk 标注 violation_tags。
 
 用法:
     python scripts/auto_tag_chunks.py
@@ -13,7 +13,7 @@ from pathlib import Path
 # 将 src 加入路径以导入配置
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from config.violation_types import VIOLATION_TYPES, COMPLIANCE_TAGS
+from config.violation_types import VIOLATION_TYPES
 
 CHUNKS_PATH = Path(__file__).resolve().parent.parent / "data" / "chunks" / "chunks.json"
 MAX_VIOLATION_TAGS = 3
@@ -43,7 +43,7 @@ def _is_excluded_context(text: str, keyword: str, start_pos: int, tag_id: str) -
     return False
 
 
-def match_tags(text: str, tag_definitions: dict, is_violation: bool = False) -> list:
+def match_tags(text: str, tag_definitions: dict) -> list:
     """根据 keywords 匹配标签，返回匹配的 tag ID 列表（去重，保持首次匹配顺序）。"""
     matched = []
     seen = set()
@@ -59,7 +59,7 @@ def match_tags(text: str, tag_definitions: dict, is_violation: bool = False) -> 
             idx = text_lower.find(kw_lower)
             if idx != -1:
                 # 上下文排除过滤
-                if is_violation and _is_excluded_context(text_lower, kw_lower, idx, tag_id):
+                if _is_excluded_context(text_lower, kw_lower, idx, tag_id):
                     continue
                 if tag_id not in seen:
                     matched.append(tag_id)
@@ -81,19 +81,16 @@ def tag_chunks(chunks: list) -> list:
         text = new_chunk.get("article_text", "")
         article_id = str(new_chunk.get("article_id", ""))
 
-        # 合规标签：所有 chunk 都检查
-        compliance = match_tags(text, COMPLIANCE_TAGS, is_violation=False)
-
         # 违规标签：总则/定义性条文跳过
         if is_general_article(article_id):
             violations = []
         else:
-            violations = match_tags(text, VIOLATION_TYPES, is_violation=True)
+            violations = match_tags(text, VIOLATION_TYPES)
             if len(violations) > MAX_VIOLATION_TAGS:
                 violations = violations[:MAX_VIOLATION_TAGS]
 
         new_chunk["violation_tags"] = violations
-        new_chunk["compliance_tags"] = compliance
+        new_chunk.pop("compliance_tags", None)
         tagged.append(new_chunk)
     return tagged
 
@@ -103,7 +100,6 @@ def generate_report(tagged: list) -> dict:
     report = {
         "total_chunks": len(tagged),
         "violation_counts": {},
-        "compliance_counts": {},
         "untagged": 0,
         "examples": {},
     }
@@ -115,14 +111,10 @@ def generate_report(tagged: list) -> dict:
         report["violation_counts"][vid] = 0
         report["examples"][vid] = []
 
-    for cid in COMPLIANCE_TAGS:
-        report["compliance_counts"][cid] = 0
-
     for chunk in tagged:
         vtags = chunk.get("violation_tags", [])
-        ctags = chunk.get("compliance_tags", [])
 
-        if not vtags and not ctags:
+        if not vtags:
             report["untagged"] += 1
 
         for vid in vtags:
@@ -134,9 +126,6 @@ def generate_report(tagged: list) -> dict:
                         "article_text": chunk.get("article_text", "")[:120],
                     }
                 )
-
-        for cid in ctags:
-            report["compliance_counts"][cid] = report["compliance_counts"].get(cid, 0) + 1
 
     return report
 
@@ -153,11 +142,6 @@ def print_report(report: dict) -> None:
     for vid, cnt in sorted(report["violation_counts"].items()):
         name = VIOLATION_TYPES.get(vid, {}).get("name", vid)
         print(f"  {vid} ({name}): {cnt}")
-
-    print("\n--- 合规标签分布 ---")
-    for cid, cnt in sorted(report["compliance_counts"].items()):
-        name = COMPLIANCE_TAGS.get(cid, {}).get("name", cid)
-        print(f"  {cid} ({name}): {cnt}")
 
     print("\n--- 标注示例（每类违规类型取2个典型 chunk） ---")
     for vid, examples in sorted(report["examples"].items()):

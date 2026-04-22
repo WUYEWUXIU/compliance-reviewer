@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import List
 
-from src.config.violation_types import COMPLIANCE_TAGS, VIOLATION_TYPES
+from src.config.violation_types import VIOLATION_TYPES
 from src.retrieval.hybrid_search import RerankResult
 
 
@@ -34,11 +34,6 @@ def build_system_prompt() -> str:
             f"  {vid}: {vinfo['name']} (severity: {severity})"
         )
 
-    # --- Compliance tag table ---
-    compliance_lines: List[str] = []
-    for cid, cinfo in COMPLIANCE_TAGS.items():
-        compliance_lines.append(f"  {cid}: {cinfo['name']}")
-
     prompt = f"""你是一名资深的金融合规审核专家，擅长审查保险及金融产品的营销文案是否符合监管要求。
 
 ## 审核原则
@@ -50,9 +45,6 @@ def build_system_prompt() -> str:
 
 ## 违规类型枚举表（V01-V11）
 {chr(10).join(violation_lines)}
-
-## 合规正向行为标签（C01-C03）
-{chr(10).join(compliance_lines)}
 
 ## 输出格式要求
 你必须以严格的 JSON 格式输出审核结论，包含以下字段：
@@ -66,12 +58,9 @@ def build_system_prompt() -> str:
     - reason: 具体违规说明
     - severity: critical / warning / info
     - directional_advice: 修改建议
-- positive_compliance: 检测到的合规正向行为数组，每项包含：
-    - tag_id: 标签编号（如 C01）
-    - tag_name: 标签名称
-    - evidence: 文案中的具体证据
+- positive_compliance: 合规正向行为数组（如无则为空数组）
 
-如果未发现违规，violations 为空数组；如果未发现合规正向行为，positive_compliance 为空数组。
+如果未发现违规，violations 为空数组。
 """
     return prompt.strip()
 

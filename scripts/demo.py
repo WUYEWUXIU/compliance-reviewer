@@ -80,11 +80,6 @@ def run_case(pipeline: CompliancePipeline, name: str, text: str) -> None:
         print(f"    原因: {v.get('reason', '')}")
         print(f"    建议: {v.get('directional_advice', '')}")
 
-    print(f"合规正向 : {len(result['positive_compliance'])} 条")
-    for p in result["positive_compliance"]:
-        print(f"  - [{p.get('tag_id', '?')}] {p.get('tag_name', '?')}")
-        print(f"    证据: {p.get('evidence', '')}")
-
     print(f"检索条文 : {len(result['top_chunks'])} 条")
     for idx, chunk in enumerate(result["top_chunks"], start=1):
         print(f"  [{idx}] {chunk['chunk_id']} (score={chunk['score']:.4f})")

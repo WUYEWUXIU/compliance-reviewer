@@ -16,7 +16,7 @@ from typing import Any, Dict, List
 import requests
 
 from src.config.settings import BAILIAN_API_KEY, BAILIAN_LLM_MODEL, LLM_TIMEOUT, MAX_RETRIES
-from src.config.violation_types import COMPLIANCE_TAGS, VIOLATION_TYPES
+from src.config.violation_types import VIOLATION_TYPES
 from src.llm_review.output_parser import parse_llm_output, validate_output
 from src.llm_review.prompt_builder import build_system_prompt, build_user_prompt
 from src.retrieval.hybrid_search import RerankResult
@@ -176,14 +176,12 @@ class LLMReviewer:
     ) -> ReviewResult:
         """Generate a rule-based mock review result.
 
-        Uses keyword matching against VIOLATION_TYPES and COMPLIANCE_TAGS,
-        with overlap resolution.
+        Uses keyword matching against VIOLATION_TYPES.
         """
         text = marketing_text.strip()
         violations: List[Dict[str, Any]] = []
-        positive_compliance: List[Dict[str, Any]] = []
 
-        # --- Violation detection (keyword matching) ---
+        # Violation detection (keyword matching)
         for vid, vinfo in VIOLATION_TYPES.items():
             if vid == "V00":
                 continue
@@ -219,19 +217,6 @@ class LLMReviewer:
                 }
             )
 
-        # --- Positive compliance detection ---
-        for cid, cinfo in COMPLIANCE_TAGS.items():
-            keywords = cinfo.get("keywords", [])
-            matched = [kw for kw in keywords if kw in text]
-            if matched:
-                positive_compliance.append(
-                    {
-                        "tag_id": cid,
-                        "tag_name": cinfo["name"],
-                        "evidence": f"文案中包含：{', '.join(matched)}",
-                    }
-                )
-
         compliant = "no" if violations else "yes"
 
         # Build a synthetic raw_output for traceability
@@ -239,7 +224,7 @@ class LLMReviewer:
             {
                 "compliant": compliant,
                 "violations": violations,
-                "positive_compliance": positive_compliance,
+                "positive_compliance": [],
                 "note": "mock_review",
             },
             ensure_ascii=False,
@@ -249,7 +234,7 @@ class LLMReviewer:
         return ReviewResult(
             compliant=compliant,
             violations=violations,
-            positive_compliance=positive_compliance,
+            positive_compliance=[],
             raw_output=raw_output,
             validation_errors=[],
             used_mock=True,

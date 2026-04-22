@@ -14,7 +14,7 @@ from typing import Any, Dict, List
 logger = logging.getLogger(__name__)
 
 # Expected top-level keys in the parsed output
-_REQUIRED_TOP_KEYS = {"compliant", "violations", "positive_compliance"}
+_REQUIRED_TOP_KEYS = {"compliant", "violations"}
 
 # Required keys inside each violation object
 _REQUIRED_VIOLATION_KEYS = {
@@ -26,13 +26,6 @@ _REQUIRED_VIOLATION_KEYS = {
     "reason",
     "severity",
     "directional_advice",
-}
-
-# Required keys inside each positive_compliance object
-_REQUIRED_POSITIVE_KEYS = {
-    "tag_id",
-    "tag_name",
-    "evidence",
 }
 
 
@@ -107,21 +100,6 @@ def validate_output(parsed: Dict[str, Any]) -> List[str]:
                     f"violations[{idx}].severity 值非法: {sev!r}"
                 )
 
-    # positive_compliance array
-    positives = parsed.get("positive_compliance")
-    if not isinstance(positives, list):
-        errors.append("positive_compliance 必须是数组")
-    else:
-        for idx, p in enumerate(positives):
-            if not isinstance(p, dict):
-                errors.append(f"positive_compliance[{idx}] 必须是对象")
-                continue
-            missing_p = _REQUIRED_POSITIVE_KEYS - set(p.keys())
-            if missing_p:
-                errors.append(
-                    f"positive_compliance[{idx}] 缺少字段: {sorted(missing_p)}"
-                )
-
     return errors
 
 
@@ -181,7 +159,6 @@ def _build_fallback(raw_output: str, reason: str) -> Dict[str, Any]:
     return {
         "compliant": "unknown",
         "violations": [],
-        "positive_compliance": [],
         "error": "llm_output_unparseable",
         "raw_output": raw_output,
         "reason": reason,
