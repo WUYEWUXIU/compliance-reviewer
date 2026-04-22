@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 
 from src.llm_review.output_parser import parse_llm_output, validate_output
 from src.llm_review.reviewer import LLMReviewer, ReviewResult
+from src.multimodal.image_processor import ImageProcessor, merge_text_and_images
 from src.retrieval.hybrid_search import HybridSearch, HybridSearchResult, RerankResult
 from src.retrieval.query_rewriter import QueryRewriter
 
@@ -21,21 +22,34 @@ class CompliancePipeline:
         self.hybrid_search = HybridSearch()
         self.query_rewriter = QueryRewriter()
         self.llm_reviewer = LLMReviewer()
+        self.image_processor = ImageProcessor()
 
-    def review(self, marketing_text: str) -> Dict[str, Any]:
-        """Run the full compliance review pipeline."""
+    def review(
+        self,
+        marketing_text: str,
+        images: List[str] | None = None,
+    ) -> Dict[str, Any]:
+        """Run the full compliance review pipeline.
+
+        Args:
+            marketing_text: The marketing copy to review.
+            images: Optional list of image inputs (file paths, URLs, or base64).
+                    Image text is extracted and merged with marketing_text before review.
+        """
         try:
-            return self._run_pipeline(marketing_text)
+            return self._run_pipeline(marketing_text, images or [])
         except Exception as exc:
             logger.error("Pipeline uncaught exception: %s", exc)
             logger.debug(traceback.format_exc())
             return self._build_error_response(f"Pipeline internal error: {exc}")
 
-    def _run_pipeline(self, marketing_text: str) -> Dict[str, Any]:
-        search_result = self._safe_search(marketing_text)
+    def _run_pipeline(self, marketing_text: str, images: List[str]) -> Dict[str, Any]:
+        image_text = self._safe_image_extract(images)
+        combined_text = merge_text_and_images(marketing_text, image_text)
+        search_result = self._safe_search(combined_text)
 
         if not search_result.top_chunks:
-            logger.warning("No relevant chunks retrieved for: %s", marketing_text[:50])
+            logger.warning("No relevant chunks retrieved for: %s", combined_text[:50])
             return {
                 "compliant": "unknown",
                 "violations": [],
@@ -45,8 +59,17 @@ class CompliancePipeline:
                 "reference_chunks": [],
             }
 
-        review_result = self._safe_llm_review(marketing_text, search_result)
+        review_result = self._safe_llm_review(combined_text, search_result)
         return self._assemble_response(search_result, review_result)
+
+    def _safe_image_extract(self, images: List[str]) -> str:
+        if not images:
+            return ""
+        try:
+            return self.image_processor.extract(images)
+        except Exception as exc:
+            logger.error("Image extraction failed: %s", exc)
+            return ""
 
     def _safe_search(self, marketing_text: str) -> HybridSearchResult:
         try:

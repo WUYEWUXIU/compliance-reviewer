@@ -10,17 +10,19 @@ REFERENCES_DIR = DATA_DIR / "references"
 
 # API keys from environment (do not hardcode)
 dotenv.load_dotenv()  # Load from .env if present
-BAILIAN_API_KEY = os.getenv("BAILIAN_API_KEY") or os.getenv("DASHSCOPE_API_KEY", "")
+BAILIAN_API_KEY = os.getenv(
+    "BAILIAN_API_KEY") or os.getenv("DASHSCOPE_API_KEY", "")
 BAILIAN_EMBEDDING_MODEL = os.getenv(
     "BAILIAN_EMBEDDING_MODEL", "text-embedding-v3")
 BAILIAN_RERANK_MODEL = os.getenv("BAILIAN_RERANK_MODEL", "gte-rerank")
 BAILIAN_LLM_MODEL = os.getenv("BAILIAN_LLM_MODEL", "qwen-max")
+BAILIAN_VL_MODEL = os.getenv("BAILIAN_VL_MODEL", "qwen-vl-max")
 
 # Retrieval settings
-RRF_K = 20
-TOP_K_BM25 = 10
-TOP_K_VECTOR = 10
-TOP_K_RERANK = 5
+RRF_K = 60
+TOP_K_BM25 = 30
+TOP_K_VECTOR = 30
+TOP_K_RERANK = 10
 RERANK_THRESHOLD = 0.15
 
 # Confidence weights
