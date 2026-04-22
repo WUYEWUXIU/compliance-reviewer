@@ -67,18 +67,21 @@ class LLMReviewer:
     ) -> ReviewResult:
         """Run compliance review on marketing text."""
         if not self.api_key:
-            logger.warning("BAILIAN_API_KEY not configured; using mock review.")
+            logger.warning(
+                "BAILIAN_API_KEY not configured; using mock review.")
             return self._mock_review(marketing_text, top_chunks, reference_chunks)
 
         system_prompt = build_system_prompt()
-        user_prompt = build_user_prompt(marketing_text, top_chunks, reference_chunks)
+        user_prompt = build_user_prompt(
+            marketing_text, top_chunks, reference_chunks)
 
         raw_output = self._call_llm_with_retry(system_prompt, user_prompt)
         parsed = parse_llm_output(raw_output)
         validation_errors = validate_output(parsed)
 
         if validation_errors:
-            logger.warning("LLM output validation errors: %s", validation_errors)
+            logger.warning("LLM output validation errors: %s",
+                           validation_errors)
 
         return ReviewResult(
             compliant=parsed.get("compliant", "unknown"),
@@ -140,7 +143,8 @@ class LLMReviewer:
 
             except requests.exceptions.Timeout:
                 last_error = requests.exceptions.Timeout("LLM API timeout")
-                logger.warning("LLM API attempt %d/%d timed out", attempt, MAX_RETRIES)
+                logger.warning("LLM API attempt %d/%d timed out",
+                               attempt, MAX_RETRIES)
             except requests.exceptions.RequestException as exc:
                 last_error = exc
                 logger.warning(
@@ -153,7 +157,8 @@ class LLMReviewer:
                 logger.info("Retrying in %d seconds...", backoff)
                 time.sleep(backoff)
 
-        logger.error("LLM API failed after %d retries: %s", MAX_RETRIES, last_error)
+        logger.error("LLM API failed after %d retries: %s",
+                     MAX_RETRIES, last_error)
         return json.dumps(
             {
                 "compliant": "unknown",
@@ -212,8 +217,7 @@ class LLMReviewer:
                     "doc_name": doc_name,
                     "article_text": article_text,
                     "reason": f"文案中包含关键词：{', '.join(matched)}",
-                    "severity": vinfo.get("severity", "warning"),
-                    "directional_advice": f"建议删除或修改包含{matched[0]}的表述，确保不违反{vinfo['name']}相关规定。",
+                    "severity": vinfo.get("severity", "warning")
                 }
             )
 

@@ -4,6 +4,9 @@ Tests mock reviewer, output parser fallback, and output validation.
 """
 
 from __future__ import annotations
+from src.retrieval.hybrid_search import RerankResult
+from src.llm_review.reviewer import LLMReviewer, ReviewResult
+from src.llm_review.output_parser import parse_llm_output, validate_output
 
 import json
 import sys
@@ -11,10 +14,6 @@ from pathlib import Path
 
 # Ensure src is on path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-
-from src.llm_review.output_parser import parse_llm_output, validate_output
-from src.llm_review.reviewer import LLMReviewer, ReviewResult
-from src.retrieval.hybrid_search import RerankResult
 
 
 def _make_chunk(chunk_id: str, text: str, score: float = 0.9) -> RerankResult:
@@ -54,7 +53,6 @@ def test_mock_violation_detection() -> None:
         assert "article_text" in v
         assert "reason" in v
         assert "severity" in v
-        assert "directional_advice" in v
 
     print("[PASS] test_mock_violation_detection")
 
@@ -72,8 +70,7 @@ def test_output_parser_valid_json() -> None:
                     "doc_name": "保险销售行为管理办法",
                     "article_text": "不得承诺确定收益",
                     "reason": "文案承诺年化5%",
-                    "severity": "critical",
-                    "directional_advice": "建议删除收益承诺",
+                    "severity": "critical"
                 }
             ],
         },

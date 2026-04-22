@@ -57,7 +57,6 @@ def build_system_prompt() -> str:
     - article_text: 条文原文摘要
     - reason: 具体违规说明
     - severity: critical / warning / info
-    - directional_advice: 修改建议
 - positive_compliance: 合规正向行为数组（如无则为空数组）
 
 如果未发现违规，violations 为空数组。

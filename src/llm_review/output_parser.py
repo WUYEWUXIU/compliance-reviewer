@@ -24,8 +24,7 @@ _REQUIRED_VIOLATION_KEYS = {
     "doc_name",
     "article_text",
     "reason",
-    "severity",
-    "directional_advice",
+    "severity"
 }
 
 
