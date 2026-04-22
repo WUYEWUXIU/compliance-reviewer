@@ -13,3 +13,9 @@ __pycache__/
 # IDE
 .idea/
 .vscode/
+
+# claude
+.claude/
+.agents/
+
+evaluation*
