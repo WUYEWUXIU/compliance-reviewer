@@ -28,7 +28,7 @@ flowchart TD
     A["用户输入<br/>文本 / 图文"] --> B["预处理层"]
     B --> B1["文本清洗"]
     B --> B2["图像 OCR<br/>qwen-vl-max"]
-    B1 & B2 --> C["Query 改写<br/>（合规意图扩展）"]
+    B1 & B2 --> C["Query 改写<br/>qwen-turbo"]
 
     C --> D["混合检索层"]
     D --> D1["BM25 稀疏检索<br/>Top-30"]
