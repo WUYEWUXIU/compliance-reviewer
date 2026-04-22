@@ -11,12 +11,12 @@ import logging
 import os
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List
 
 import requests
 
 from src.config.settings import BAILIAN_API_KEY, BAILIAN_LLM_MODEL, LLM_TIMEOUT, MAX_RETRIES
-from src.config.violation_types import COMPLIANCE_TAGS, NEGATION_PATTERNS, VIOLATION_TYPES
+from src.config.violation_types import COMPLIANCE_TAGS, VIOLATION_TYPES
 from src.llm_review.output_parser import parse_llm_output, validate_output
 from src.llm_review.prompt_builder import build_system_prompt, build_user_prompt
 from src.retrieval.hybrid_search import RerankResult
@@ -177,21 +177,11 @@ class LLMReviewer:
         """Generate a rule-based mock review result.
 
         Uses keyword matching against VIOLATION_TYPES and COMPLIANCE_TAGS,
-        with negation-aware logic and overlap resolution.
+        with overlap resolution.
         """
         text = marketing_text.strip()
         violations: List[Dict[str, Any]] = []
         positive_compliance: List[Dict[str, Any]] = []
-
-        # --- Negation detection ---
-        negated = any(pat in text for pat in NEGATION_PATTERNS)
-
-        # --- Collect all positive keywords and their substrings ---
-        all_positive_keywords: Set[str] = set()
-        for cinfo in COMPLIANCE_TAGS.values():
-            for kw in cinfo.get("keywords", []):
-                if kw in text:
-                    all_positive_keywords.add(kw)
 
         # --- Violation detection (keyword matching) ---
         for vid, vinfo in VIOLATION_TYPES.items():
@@ -201,27 +191,6 @@ class LLMReviewer:
             matched = [kw for kw in keywords if kw in text]
             if not matched:
                 continue
-
-            # If negated and the matched keyword is commonly negated, skip
-            if negated and _is_likely_negated(text, matched):
-                continue
-
-            # Overlap resolution: if a violation keyword is a substring of
-            # any positive compliance keyword found in text, skip it (the
-            # positive context takes precedence in mock mode).
-            filtered_matched = []
-            for kw in matched:
-                if any(kw in pk and kw != pk for pk in all_positive_keywords):
-                    # kw is a strict substring of a positive keyword
-                    continue
-                if kw in all_positive_keywords:
-                    # kw exactly matches a positive keyword
-                    continue
-                filtered_matched.append(kw)
-
-            if not filtered_matched:
-                continue
-            matched = filtered_matched
 
             # Pick the best chunk as evidence
             best_chunk = top_chunks[0] if top_chunks else None
@@ -285,24 +254,3 @@ class LLMReviewer:
             validation_errors=[],
             used_mock=True,
         )
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def _is_likely_negated(text: str, matched_keywords: List[str]) -> bool:
-    """Heuristic: check if matched keywords appear in a negated context.
-
-    Looks for negation prefixes within 6 characters before the keyword.
-    """
-    negation_prefixes = ["不", "非", "无", "没有", "不存在", "并非", "不等于", "不涉及", "不含"]
-    for kw in matched_keywords:
-        idx = text.find(kw)
-        if idx > 0:
-            window = text[max(0, idx - 6) : idx]
-            for prefix in negation_prefixes:
-                if window.endswith(prefix):
-                    return True
-    return False

@@ -13,11 +13,7 @@ from pathlib import Path
 # 将 src 加入路径以导入配置
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from config.violation_types import (
-    VIOLATION_TYPES,
-    COMPLIANCE_TAGS,
-    NEGATION_PATTERNS,
-)
+from config.violation_types import VIOLATION_TYPES, COMPLIANCE_TAGS
 
 CHUNKS_PATH = Path(__file__).resolve().parent.parent / "data" / "chunks" / "chunks.json"
 MAX_VIOLATION_TAGS = 3
@@ -30,16 +26,6 @@ EXCLUSION_CONTEXTS = {
     "V08": ["退保金", "退保损失", "退保流程", "退保渠道", "退保条件", "退保管理", "退保申请", "退保时"],
     "V09": ["备案手续", "备案编号", "备案名称"],
 }
-
-
-def _has_negation_before(text: str, keyword: str, start_pos: int) -> bool:
-    """检查关键词前是否出现否定模式，简单窗口检查。"""
-    window_start = max(0, start_pos - 12)
-    window = text[window_start:start_pos]
-    for neg in NEGATION_PATTERNS:
-        if neg in window:
-            return True
-    return False
 
 
 def _is_excluded_context(text: str, keyword: str, start_pos: int, tag_id: str) -> bool:
@@ -72,9 +58,6 @@ def match_tags(text: str, tag_definitions: dict, is_violation: bool = False) -> 
             kw_lower = kw.lower()
             idx = text_lower.find(kw_lower)
             if idx != -1:
-                # 否定过滤
-                if is_violation and _has_negation_before(text_lower, kw_lower, idx):
-                    continue
                 # 上下文排除过滤
                 if is_violation and _is_excluded_context(text_lower, kw_lower, idx, tag_id):
                     continue

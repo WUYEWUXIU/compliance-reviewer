@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from src.config.violation_types import NEGATION_PATTERNS, VIOLATION_TYPES
+from src.config.violation_types import VIOLATION_TYPES
 
 
 @dataclass(frozen=True)
@@ -18,7 +18,6 @@ class RewriteRequest:
     violation_type_id: str
     query_text: str
     keywords: list[str]
-    negated: bool = False
 
 
 class QueryRewriter:
@@ -92,16 +91,6 @@ class QueryRewriter:
         "V00": "通用合规要求",
     }
 
-    # Negation expressions that imply a specific violation type even when the
-    # positive keyword is not present. Used to improve recall in negated contexts.
-    _NEGATION_TRIGGERS: dict[str, list[str]] = {
-        "V01": ["不保本", "非保本", "不保息", "本金不安全"],
-        "V02": ["不确定", "不保证收益", "非保证收益", "收益不保证", "收益不确定"],
-        "V03": ["不是最好", "不是最优", "不是第一"],
-        "V07": ["不免费", "有手续费", "有管理费", "有费用"],
-        "V08": ["不退保", "不转保"],
-    }
-
     def rewrite(self, text: str) -> list[RewriteRequest]:
         """Rewrite raw marketing copy into structured retrieval requests.
 
@@ -115,8 +104,6 @@ class QueryRewriter:
             return []
 
         normalized = text.strip()
-        negated = self._detect_negation(normalized)
-
         requests: list[RewriteRequest] = []
         seen_query_texts: set[str] = set()
 
@@ -125,11 +112,6 @@ class QueryRewriter:
             if vid == "V00":
                 continue
             matched_keywords = self._match_keywords(normalized, vinfo.get("keywords", []))
-            # Supplement with negation triggers when the text is negated
-            if not matched_keywords and negated:
-                matched_keywords = self._match_keywords(
-                    normalized, self._NEGATION_TRIGGERS.get(vid, [])
-                )
             if matched_keywords:
                 query_text = self._QUERY_TEMPLATES.get(vid, vinfo["name"])
                 if query_text not in seen_query_texts:
@@ -139,7 +121,6 @@ class QueryRewriter:
                             violation_type_id=vid,
                             query_text=query_text,
                             keywords=matched_keywords,
-                            negated=negated,
                         )
                     )
 
@@ -155,7 +136,6 @@ class QueryRewriter:
                             violation_type_id="V00",
                             query_text=fallback_query,
                             keywords=fallback_keywords,
-                            negated=negated,
                         )
                     )
 
@@ -170,19 +150,10 @@ class QueryRewriter:
                     violation_type_id="V00",
                     query_text=normalized,
                     keywords=[],
-                    negated=negated,
                 )
             )
 
         return requests
-
-    @staticmethod
-    def _detect_negation(text: str) -> bool:
-        """Return True if the text contains any negation pattern."""
-        for pat in NEGATION_PATTERNS:
-            if pat in text:
-                return True
-        return False
 
     @staticmethod
     def _match_keywords(text: str, keywords: list[str]) -> list[str]:

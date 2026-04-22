@@ -1,19 +1,14 @@
 """Prompt builder for LLM compliance review.
 
 Constructs system and user prompts for the Bailian LLM, embedding the
-full violation-type catalogue, negation instructions, and structured output
-schema.
+full violation-type catalogue and structured output schema.
 """
 
 from __future__ import annotations
 
 from typing import List
 
-from src.config.violation_types import (
-    COMPLIANCE_TAGS,
-    NEGATION_PATTERNS,
-    VIOLATION_TYPES,
-)
+from src.config.violation_types import COMPLIANCE_TAGS, VIOLATION_TYPES
 from src.retrieval.hybrid_search import RerankResult
 
 
@@ -27,7 +22,7 @@ def build_system_prompt() -> str:
 
     Returns:
         A detailed system prompt containing role definition, violation
-        catalogue, negation rules, and output schema instructions.
+        catalogue, and output schema instructions.
     """
     # --- Violation table ---
     violation_lines: List[str] = []
@@ -44,16 +39,11 @@ def build_system_prompt() -> str:
     for cid, cinfo in COMPLIANCE_TAGS.items():
         compliance_lines.append(f"  {cid}: {cinfo['name']}")
 
-    # --- Negation patterns ---
-    negation_list = ", ".join(NEGATION_PATTERNS)
-
     prompt = f"""你是一名资深的金融合规审核专家，擅长审查保险及金融产品的营销文案是否符合监管要求。
 
 ## 审核原则
 1. 仅根据下方提供的【相关条文】和【参考条文】进行判断，禁止引用上下文之外的任何条文或知识。
-2. 对文案中的否定表述保持敏感：如果文案明确否定了某种违规行为（如"不保本""非保证收益"），则不应将其判定为违规。
-3. 常见否定表述包括：{negation_list}
-4.  severity 分级：
+2. severity 分级：
    - critical：严重违规，必须立即整改
    - warning：一般违规，建议修改
    - info：轻微问题或提示性建议

@@ -59,27 +59,6 @@ def test_mock_violation_detection() -> None:
     print("[PASS] test_mock_violation_detection")
 
 
-def test_mock_negation_aware() -> None:
-    """Test that negated keywords are NOT flagged as violations."""
-    reviewer = LLMReviewer(api_key="")
-    text = "本产品不保本，收益不确定，投资有风险。"
-    chunks = [
-        _make_chunk(
-            "保险销售行为管理办法_第二十一条_0",
-            "保险销售人员不得承诺本金不受损失。",
-        ),
-    ]
-    result = reviewer.review(text, chunks, [])
-
-    assert result.used_mock is True
-    # "不保本" should not trigger V01; "不确定" should not trigger V02
-    vids = {v["violation_type_id"] for v in result.violations}
-    assert "V01" not in vids, f"V01 should not fire for negated text, got {vids}"
-    assert "V02" not in vids, f"V02 should not fire for negated text, got {vids}"
-
-    print("[PASS] test_mock_negation_aware")
-
-
 def test_mock_positive_compliance() -> None:
     """Test that mock reviewer detects positive compliance signals and
     does not flag them as violations."""
@@ -226,7 +205,6 @@ def test_system_prompt_contains_catalogue() -> None:
     assert "V11" in prompt
     assert "C01" in prompt
     assert "C03" in prompt
-    assert "不保本" in prompt  # negation pattern
     assert "JSON" in prompt
     assert "positive_compliance" in prompt
 
@@ -262,7 +240,6 @@ if __name__ == "__main__":
     print("=" * 60)
 
     test_mock_violation_detection()
-    test_mock_negation_aware()
     test_mock_positive_compliance()
     test_output_parser_valid_json()
     test_output_parser_markdown_fence()

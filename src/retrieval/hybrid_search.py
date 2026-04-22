@@ -318,7 +318,6 @@ class HybridSearch:
                     violation_type_id="V00",
                     query_text=marketing_text.strip(),
                     keywords=[],
-                    negated=False,
                 )
             ]
 

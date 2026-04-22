@@ -31,7 +31,6 @@ graph TB
         C2["chunk_coverage (W=0.2)<br/>阈值通过率"]
         C3["multi_query_agreement (W=0.2)<br/>Jaccard 相似度"]
         C4["semantic_diversity (W=0.2)<br/>余弦距离倒数"]
-        NEG["negation_penalty<br/>否定语境 ×0.5"]
         LOW["low-evidence cap<br/>全低分合规 → 上限0.4"]
     end
 
@@ -73,7 +72,6 @@ graph TB
     CONF --> C2
     CONF --> C3
     CONF --> C4
-    CONF --> NEG
     CONF --> LOW
 
     PL --> PB
