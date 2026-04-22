@@ -199,6 +199,23 @@ class Reranker:
                     )
 
                 reranked.sort(key=lambda x: x.score, reverse=True)
+
+                # If threshold filters everything, fallback to RRF ordering
+                # to avoid returning empty results when retrieval is viable.
+                if not reranked:
+                    logger.warning(
+                        "Rerank scores all below threshold %.2f; falling back to RRF.",
+                        RERANK_THRESHOLD,
+                    )
+                    return [
+                        RerankResult(
+                            chunk_id=cid,
+                            score=round(score, 6),
+                            text=chunk_text_map.get(cid, ""),
+                        )
+                        for cid, score in valid_candidates[:top_k]
+                    ]
+
                 return reranked[:top_k]
 
             except Exception as exc:
