@@ -159,8 +159,12 @@ class QueryRewriter:
                         )
                     )
 
-        # 3. Always append the original text as a catch-all query
-        if normalized not in seen_query_texts:
+        # 3. Append the original text as a catch-all query only if no V00
+        #    query already exists (avoids duplicate V00 entries that harm
+        #    multi-query agreement scores).
+        if normalized not in seen_query_texts and not any(
+            req.violation_type_id == "V00" for req in requests
+        ):
             requests.append(
                 RewriteRequest(
                     violation_type_id="V00",
