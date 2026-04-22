@@ -23,58 +23,6 @@ class RewriteRequest:
 class QueryRewriter:
     """Rewrite marketing text into compliance retrieval queries."""
 
-    # Regulatory-sensitive keywords used as fallback when rule matches are sparse.
-    _FALLBACK_KEYWORDS = [
-        "保本",
-        "保息",
-        "零风险",
-        "年化",
-        "稳稳到手",
-        "固定收益",
-        "确定回报",
-        "保证收益",
-        "稳赚",
-        "最优",
-        "第一",
-        "最强",
-        "绝无仅有",
-        "最好",
-        "顶级",
-        "唯一",
-        "明星推荐",
-        "专家推荐",
-        "权威认证",
-        "风险提示",
-        "犹豫期",
-        "退保损失",
-        "比其他",
-        "业内最优",
-        "贬低",
-        "碾压",
-        "免保费",
-        "零手续费",
-        "无管理费",
-        "免费",
-        "退保",
-        "转保",
-        "升级换代",
-        "旧保单",
-        "换了买",
-        "银保监会批准",
-        "备案编号",
-        "特别批准",
-        "监管备案",
-        "客户案例",
-        "内部客户",
-        "专享",
-        "仅限老客户",
-        "送体检",
-        "保单变现",
-        "免费旅游",
-        "送礼",
-        "返佣",
-    ]
-
     # Mapping from violation type to concise regulatory-style query text (<=10 chars).
     _QUERY_TEMPLATES: dict[str, str] = {
         "V01": "承诺保本保息",
@@ -124,22 +72,7 @@ class QueryRewriter:
                         )
                     )
 
-        # 2. Fallback: if fewer than 2 rule matches, extract sensitive keywords
-        if len(requests) < 2:
-            fallback_keywords = self._extract_fallback_keywords(normalized)
-            if fallback_keywords:
-                fallback_query = "、".join(fallback_keywords[:3])
-                if fallback_query not in seen_query_texts:
-                    seen_query_texts.add(fallback_query)
-                    requests.append(
-                        RewriteRequest(
-                            violation_type_id="V00",
-                            query_text=fallback_query,
-                            keywords=fallback_keywords,
-                        )
-                    )
-
-        # 3. Append the original text as a catch-all query only if no V00
+        # 2. Append the original text as a catch-all query only if no V00
         #    query already exists (avoids duplicate V00 entries that harm
         #    multi-query agreement scores).
         if normalized not in seen_query_texts and not any(
@@ -161,14 +94,5 @@ class QueryRewriter:
         found = []
         for kw in keywords:
             if kw in text:
-                found.append(kw)
-        return found
-
-    @staticmethod
-    def _extract_fallback_keywords(text: str) -> list[str]:
-        """Extract regulatory-sensitive keywords from text for fallback queries."""
-        found = []
-        for kw in QueryRewriter._FALLBACK_KEYWORDS:
-            if kw in text and kw not in found:
                 found.append(kw)
         return found
