@@ -41,7 +41,6 @@ flowchart TD
 
     F --> G["审核结论<br/>合规 yes/no"]
     F --> H["违规详情<br/>类型·条文·原因·置信度"]
-    F --> I["改进建议"]
 
     subgraph 知识库构建
         K1["3篇监管文档<br/>PDF / DOCX"] --> K2["按条文分块<br/>chunks.json"]
