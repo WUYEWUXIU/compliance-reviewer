@@ -1,0 +1,167 @@
+[
+  {
+    "id": "V01-pos-001",
+    "text": "购买本产品，本金完全保障，绝对不会损失一分钱！",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V01-pos-002",
+    "text": "零风险理财，本金无忧，让您的财富稳稳增长。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V01-neg-001",
+    "text": "本产品不保本，投资有风险，历史收益不代表未来表现。",
+    "expected_compliant": "yes"
+  },
+  {
+    "id": "V01-neg-002",
+    "text": "本金安全是每位投资者的关切，我们的产品虽然追求稳健，但不承诺本金不受损失，请根据自身风险承受能力选择。",
+    "expected_compliant": "yes"
+  },
+  {
+    "id": "V01-hard-001",
+    "text": "我们精选低风险资产配置，多年来客户本金从未出现亏损。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V02-pos-001",
+    "text": "年化收益7%，固定到手，每月自动结算，稳赚不赔！",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V02-pos-002",
+    "text": "保证年化收益不低于4.5%，到期一次性结算，确定回报。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V02-neg-001",
+    "text": "历史年化收益约6%，仅供参考，实际收益以到期结算为准，投资有风险。",
+    "expected_compliant": "yes"
+  },
+  {
+    "id": "V02-hard-001",
+    "text": "过去三年，我们的产品每年都为客户带来了8%的回报，表现十分稳定。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V03-pos-001",
+    "text": "行业最优产品，没有比我们更好的选择，全市场第一！",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V03-pos-002",
+    "text": "顶级专家团队，绝无仅有的投资机会，仅限本周。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V03-neg-001",
+    "text": "我们追求为客户提供优质服务，持续改进产品体验。",
+    "expected_compliant": "yes"
+  },
+  {
+    "id": "V03-hard-001",
+    "text": "本产品是目前市场上唯一支持T+0赎回的同类产品。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V04-pos-001",
+    "text": "知名影星XX倾情推荐，专家团队背书，购买无忧！",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V04-pos-002",
+    "text": "内部人士透露，这是今年最值得购买的产品，仅限内部渠道。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V04-neg-001",
+    "text": "由持牌金融机构XX保险公司承保，依法合规销售。",
+    "expected_compliant": "yes"
+  },
+  {
+    "id": "V05-pos-001",
+    "text": "比银行理财收益高50%，完全碾压其他同类产品，不选我们就是吃亏！",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V05-neg-001",
+    "text": "本产品预期收益高于当前一年期定期存款基准利率，具体以合同为准。",
+    "expected_compliant": "yes"
+  },
+  {
+    "id": "V06-pos-001",
+    "text": "零手续费，无管理费，完全免费购买，到手收益更高！",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V06-neg-001",
+    "text": "本产品收取1.2%/年管理费，申购费0.5%，详见费用说明。",
+    "expected_compliant": "yes"
+  },
+  {
+    "id": "V06-hard-001",
+    "text": "购买本产品无需支付任何额外费用，一分不多收。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V07-pos-001",
+    "text": "旧保单收益太低，赶紧退保升级新产品，换了才不亏！",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V07-pos-002",
+    "text": "您现有保单已不适合当前需求，建议终止后转入我们的升级产品。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V07-neg-001",
+    "text": "退保会导致损失，请充分了解后谨慎决定，如需帮助请联系顾问。",
+    "expected_compliant": "yes"
+  },
+  {
+    "id": "V08-pos-001",
+    "text": "本产品已获银保监会特别批准，备案编号XY20240001，独家授权销售。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V08-neg-001",
+    "text": "本产品备案编号请登录银保监会官网查询，销售资质公示于门店。",
+    "expected_compliant": "yes"
+  },
+  {
+    "id": "V09-pos-001",
+    "text": "购买即送价值3000元免费体检套餐，还有机会赢取免费旅游大奖！",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V09-pos-002",
+    "text": "老客户专享返佣，累计购买可获保单增值礼包。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "V09-neg-001",
+    "text": "新客户可享受首月免费咨询服务，专属顾问一对一解答。",
+    "expected_compliant": "yes"
+  },
+  {
+    "id": "MIX-001",
+    "text": "明星XX倾情推荐！年化8%固定收益，本金完全保障，全市场最优产品，立即购买送体检！",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "MIX-002",
+    "text": "历史业绩稳健，过去五年无一年亏损，适合追求稳定的您，欢迎咨询。",
+    "expected_compliant": "no"
+  },
+  {
+    "id": "COMP-001",
+    "text": "本产品由XX人寿保险股份有限公司承保（备案编号请登录银保监会官网查询）。产品存在投资风险，历史业绩不代表未来收益，请根据自身风险承受能力谨慎选择。犹豫期为10个自然日，犹豫期内退保不收取任何费用；犹豫期后退保将产生损失。管理费率0.8%/年，申购费0.3%，详见合同费用说明。",
+    "expected_compliant": "yes"
+  },
+  {
+    "id": "COMP-002",
+    "text": "本基金产品风险等级为R3（中等），适合平衡型投资者，投资须谨慎，过往业绩不预示未来。",
+    "expected_compliant": "yes"
+  }
+]
