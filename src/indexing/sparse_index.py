@@ -29,17 +29,7 @@ _CUSTOM_TERMS_CANDIDATES = [
 ]
 
 # Chinese stopwords for regulatory/legal text
-STOPWORDS = {
-    "应当",
-    "不得",
-    "保险",
-    "产品",
-    "金融",
-    "以及",
-    "或者",
-    "可以",
-    "必须",
-}
+STOPWORDS = {}
 
 
 def _load_all_text() -> str:
@@ -69,7 +59,8 @@ def _register_custom_terms() -> List[str]:
 
 # Register at module import time
 _REGISTERED_TERMS = _register_custom_terms()
-logger.debug("Registered %d custom jieba terms: %s", len(_REGISTERED_TERMS), _REGISTERED_TERMS)
+logger.debug("Registered %d custom jieba terms: %s",
+             len(_REGISTERED_TERMS), _REGISTERED_TERMS)
 
 
 def _get_chunks() -> List[dict]:
@@ -89,7 +80,8 @@ def _tokenize(text: str) -> List[str]:
         List of tokens after stopword filtering.
     """
     tokens = list(jieba.cut(text))
-    filtered = [t.strip() for t in tokens if t.strip() and t.strip() not in STOPWORDS]
+    filtered = [t.strip() for t in tokens if t.strip()
+                and t.strip() not in STOPWORDS]
     return filtered
 
 
