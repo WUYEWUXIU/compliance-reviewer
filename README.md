@@ -67,7 +67,7 @@ flowchart TD
 
 ## 评测报告
 
-见[长文本评测](tests/evaluation_report/report_20260423_114258.md)和[短文本评测](tests/evaluation_report/report_20260423_114624.md)
+见[短文本评测](tests/evaluation_report/report_20260423_114624.md)和[长文本评测](tests/evaluation_report/report_20260423_114258.md)
 
 ---
 
